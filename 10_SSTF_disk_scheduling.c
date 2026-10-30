@@ -3,48 +3,40 @@
 
 int main()
 {
-    int n, i, head, total = 0;
+    int arr[5] = {10, 20, 60, 90, 30};
+    int visited[5] = {0};
+    int n = 5, head = 50, curr, total = 0;
 
-    printf("Enter number of disk requests: ");
-    scanf("%d", &n);
+    curr = head;
 
-    int req[n];
-    int visited[n];
-
-    printf("Enter disk requests:\n");
-    for (i = 0; i < n; i++)
-    {
-        scanf("%d", &req[i]);
-        visited[i] = 0;
-    }
-
-    printf("Enter initial head position: ");
-    scanf("%d", &head);
-
-    printf("\nSeek Sequence: %d", head);
-
-    for (i = 0; i < n; i++)
+    for (int i = 0; i < n; i++)
     {
         int min = 999999;
         int pos = -1;
 
         for (int j = 0; j < n; j++)
         {
-            if (!visited[j] && abs(head - req[j]) < min)
+            if (visited[j] == 0)
             {
-                min = abs(head - req[j]);
-                pos = j;
+                int diff = abs(curr - arr[j]);
+
+                if (diff < min)
+                {
+                    min = diff;
+                    pos = j;
+                }
             }
         }
 
-        total += abs(head - req[pos]);
-        head = req[pos];
         visited[pos] = 1;
+        total += abs(curr - arr[pos]);
+        curr = arr[pos];
 
-        printf(" -> %d", head);
+        printf("Head moves from %d to %d\n", head, arr[pos]);
+        head = arr[pos];
     }
 
-    printf("\nTotal Head Movement = %d cylinders\n", total);
+    printf("Total head movement = %d\n", total);
 
     return 0;
 }
