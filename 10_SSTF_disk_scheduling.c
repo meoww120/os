@@ -3,9 +3,9 @@
 
 int main()
 {
-    int arr[5] = {10, 20, 60, 90, 30};
-    int visited[5] = {0};
-    int n = 5, head = 50, curr, total = 0;
+    int arr[4] = {10, 20, 60, 90};
+    int visited[4] = {0};
+    int n = 4, head = 50, curr, total = 0;
 
     curr = head;
 
@@ -30,10 +30,10 @@ int main()
 
         visited[pos] = 1;
         total += abs(curr - arr[pos]);
-        curr = arr[pos];
 
-        printf("Head moves from %d to %d\n", head, arr[pos]);
-        head = arr[pos];
+        printf("Head moves from %d to %d\n", curr, arr[pos]);
+
+        curr = arr[pos];
     }
 
     printf("Total head movement = %d\n", total);
