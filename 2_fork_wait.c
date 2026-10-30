@@ -6,28 +6,17 @@
 int main()
 {
     pid_t pid;
-    int n;
-
-    printf("Enter how many integers you want: ");
-    scanf("%d", &n);
-
-    int arr[n];
-
-    printf("Enter %d integers:\n", n);
-    for (int i = 0; i < n; i++)
-    {
-        scanf("%d", &arr[i]);
-    }
+    int arr[5] = {45, 12, 67, 23, 9};
+    int n = 5;
 
     pid = fork();
 
     if (pid == 0)
     {
         // Child process
-        printf("\nThis is a child process\n");
-        printf("Child Process ID: %d\n", getpid());
-        printf("Parent Process ID: %d\n", getppid());
-
+        printf("\nThis is Child Process\n");
+        printf("Child PID: %d\n", getpid());
+        printf("Parent PID: %d\n", getppid());
         // Sort in ascending order
         for (int i = 0; i < n - 1; i++)
         {
@@ -42,22 +31,21 @@ int main()
             }
         }
 
-        printf("Array sorted in ascending order: ");
+        printf("Ascending order: ");
         for (int i = 0; i < n; i++)
-        {
             printf("%d ", arr[i]);
-        }
+
         printf("\n");
         exit(0);
     }
-    else
+    else if (pid > 0)
     {
         // Parent process
         wait(NULL);
 
-        printf("\nThis is a parent process\n");
-        printf("Parent Process ID: %d\n", getpid());
-        printf("Child Process ID: %d\n", pid);
+        printf("\nThis is Parent Process\n");
+        printf("Parent PID: %d\n", getpid());
+        printf("Child PID: %d\n", pid);
 
         // Sort in descending order
         for (int i = 0; i < n - 1; i++)
@@ -73,12 +61,16 @@ int main()
             }
         }
 
-        printf("Array sorted in descending order: ");
+        printf("Descending order: ");
         for (int i = 0; i < n; i++)
-        {
             printf("%d ", arr[i]);
-        }
+
         printf("\n");
+    }
+    else
+    {
+        printf("Fork failed!\n");
+        return 1;
     }
 
     return 0;
