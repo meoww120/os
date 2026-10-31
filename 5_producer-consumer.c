@@ -2,9 +2,7 @@
 #include <pthread.h>
 #include <semaphore.h>
 
-#define SIZE 5
-
-int buffer[SIZE];
+int buffer[5];
 int in = 0, out = 0;
 
 sem_t empty, full;
@@ -12,18 +10,14 @@ pthread_mutex_t mutex;
 
 void *producer(void *arg)
 {
-    int item;
-
     for (int i = 1; i <= 5; i++)
     {
-        item = i;
-
         sem_wait(&empty);
         pthread_mutex_lock(&mutex);
 
-        buffer[in] = item;
-        printf("Producer produced: %d\n", item);
-        in = (in + 1) % SIZE;
+        buffer[in] = i;
+        printf("Produced produced: %d\n", i);
+        in = (in + 1) % 5;
 
         pthread_mutex_unlock(&mutex);
         sem_post(&full);
@@ -34,16 +28,14 @@ void *producer(void *arg)
 
 void *consumer(void *arg)
 {
-    int item;
-
     for (int i = 1; i <= 5; i++)
     {
         sem_wait(&full);
         pthread_mutex_lock(&mutex);
 
-        item = buffer[out];
-        printf("Consumer consumed: %d\n", item);
-        out = (out + 1) % SIZE;
+        int item = buffer[out];
+        printf("Consumed consumed: %d\n", item);
+        out = (out + 1) % 5;
 
         pthread_mutex_unlock(&mutex);
         sem_post(&empty);
@@ -56,7 +48,7 @@ int main()
 {
     pthread_t p, c;
 
-    sem_init(&empty, 0, SIZE);
+    sem_init(&empty, 0, 5);
     sem_init(&full, 0, 0);
     pthread_mutex_init(&mutex, NULL);
 
@@ -65,10 +57,6 @@ int main()
 
     pthread_join(p, NULL);
     pthread_join(c, NULL);
-
-    sem_destroy(&empty);
-    sem_destroy(&full);
-    pthread_mutex_destroy(&mutex);
 
     return 0;
 }
