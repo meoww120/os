@@ -1,102 +1,88 @@
 #include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/stat.h>
 
 int main()
 {
-    int fd1, fd2;
-    char text[1000], result[1000];
-    int chars, words, lines, i;
+    char str[100], filename[20], result[500];
+    int fd1, fd2, fd, n;
 
     mkfifo("fifo1", 0666);
     mkfifo("fifo2", 0666);
 
-    if (fork() == 0)
+    fd1 = open("fifo1", O_WRONLY);
+
+    printf("Enter a sentence: ");
+    fgets(str, 100, stdin);
+
+    write(fd1, str, sizeof(str));
+    close(fd1);
+
+    fd2 = open("fifo2", O_RDONLY);
+
+    read(fd2, filename, sizeof(filename));
+    close(fd2);
+
+    fd = open(filename, O_RDONLY);
+
+    n = read(fd, result, sizeof(result) - 1);
+    result[n] = '\0';
+
+    printf("\n%s", result);
+
+    close(fd);
+
+    return 0;
+}
+
+#include <stdio.h>
+#include <unistd.h>
+#include <fcntl.h>
+
+int main()
+{
+    char str[100];
+    int fd1, fd2;
+    int i, ch = 0, words = 0, lines = 0;
+
+    fd1 = open("fifo1", O_RDONLY);
+
+    read(fd1, str, sizeof(str));
+    close(fd1);
+
+    for (i = 0; str[i] != '\0'; i++)
     {
-        // Child process: receives text and counts
-        fd1 = open("fifo1", O_RDONLY);
-        read(fd1, text, sizeof(text) - 1);
-        close(fd1);
+        if (str[i] != '\n')
+            ch++;
 
-        chars = strlen(text);
-        words = 0;
-        lines = 0;
-
-        for (i = 0; text[i] != '\0'; i++)
-        {
-            if (text[i] == ' ' || text[i] == '\n')
-                words++;
-
-            if (text[i] == '\n')
-                lines++;
-        }
-
-        if (chars > 0 && text[chars - 1] != '\n')
+        if (str[i] == '\n')
             lines++;
 
-        if (chars > 0 && text[chars - 1] != ' ' &&
-            text[chars - 1] != '\n')
+        if ((str[i] == ' ' || str[i] == '\n') &&
+            i > 0 && str[i - 1] != ' ' && str[i - 1] != '\n')
             words++;
-
-        // Store results in a file
-        FILE *fp = fopen("result.txt", "w");
-        fprintf(fp, "Text: %s\n", text);
-        fprintf(fp, "Characters: %d\n", chars);
-        fprintf(fp, "Words: %d\n", words);
-        fprintf(fp, "Lines: %d\n", lines);
-        fclose(fp);
-
-        // Send file contents back through second FIFO
-        fp = fopen("result.txt", "r");
-        fd2 = open("fifo2", O_WRONLY);
-
-        while (fgets(result, sizeof(result), fp) != NULL)
-            write(fd2, result, strlen(result));
-
-        close(fd2);
-        fclose(fp);
     }
-    else
-    {
-        // Parent process: sends text
-        printf("Enter sentences (press Ctrl+D when finished):\n");
 
-        text[0] = '\0';
+    if (i > 0 && str[i - 1] != ' ' && str[i - 1] != '\n')
+        words++;
 
-        while (fgets(result, sizeof(result), stdin) != NULL)
-        {
-            if (strlen(text) + strlen(result) < sizeof(text))
-                strcat(text, result);
-            else
-            {
-                printf("Input too long!\n");
-                break;
-            }
-        }
+    if (i > 0 && str[i - 1] != '\n')
+        lines++;
 
-        fd1 = open("fifo1", O_WRONLY);
-        write(fd1, text, strlen(text) + 1);
-        close(fd1);
+    FILE *fp = fopen("result.txt", "w");
 
-        // Receive results from child
-        fd2 = open("fifo2", O_RDONLY);
-        printf("\nResults received from child:\n");
+    fprintf(fp, "Characters: %d\n", ch);
+    fprintf(fp, "Words: %d\n", words);
+    fprintf(fp, "Lines: %d\n", lines);
 
-        while ((i = read(fd2, result, sizeof(result) - 1)) > 0)
-        {
-            result[i] = '\0';
-            printf("%s", result);
-        }
+    fclose(fp);
 
-        close(fd2);
-        wait(NULL);
+    fd2 = open("fifo2", O_WRONLY);
 
-        unlink("fifo1");
-        unlink("fifo2");
-    }
+    write(fd2, "result.txt", 11);
+
+    close(fd2);
 
     return 0;
 }
