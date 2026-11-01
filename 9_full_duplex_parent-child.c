@@ -8,10 +8,8 @@ int main()
 {
     int p1[2], p2[2];
     pid_t pid;
-    char filename[100];
-    char buffer[1000];
+    char filename[100], buffer[1000];
 
-    // Create two pipes
     pipe(p1);
     pipe(p2);
 
@@ -19,15 +17,12 @@ int main()
 
     if (pid == 0)
     {
-        // Child process
         close(p1[1]);
         close(p2[0]);
 
-        // Read filename from parent
         read(p1[0], filename, sizeof(filename));
         filename[sizeof(filename) - 1] = '\0';
 
-        // Open the file
         FILE *fp = fopen(filename, "r");
 
         if (fp == NULL)
@@ -41,7 +36,6 @@ int main()
             fclose(fp);
         }
 
-        // Send file contents to parent
         write(p2[1], buffer, strlen(buffer) + 1);
 
         close(p1[0]);
@@ -49,19 +43,15 @@ int main()
     }
     else if (pid > 0)
     {
-        // Parent process
         close(p1[0]);
         close(p2[1]);
 
-        // Enter filename
         printf("Enter file pathname: ");
         scanf("%99s", filename);
 
-        // Send filename to child
         write(p1[1], filename, strlen(filename) + 1);
         close(p1[1]);
 
-        // Read file contents from child
         int n = read(p2[0], buffer, sizeof(buffer));
 
         if (n > 0)
