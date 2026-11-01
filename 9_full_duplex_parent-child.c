@@ -1,73 +1,62 @@
-#include <stdio.h>
-#include <unistd.h>
-#include <sys/wait.h>
-#include <string.h>
-#include <stdlib.h>
+
+#include<stdio.h>
+#include<unistd.h>
+#include<sys/types.h>
+#include<fcntl.h>
 
 int main()
 {
-    int p1[2], p2[2];
-    pid_t pid;
-    char filename[100], buffer[1000];
+    int dept1[2], dept2[2], fd;
+    char filename[10] = {'\0'};
+    char buffer[200] = {'\0'};
 
-    pipe(p1);
-    pipe(p2);
+    pid_t pid;
+
+    pipe(dept1);
+    pipe(dept2);
 
     pid = fork();
 
-    if (pid == 0)
+    if(pid != 0) // parent
     {
-        close(p1[1]);
-        close(p2[0]);
+        close(dept1[0]); // close the read end of dept1
+        close(dept2[1]); // close the write end of dept2
 
-        read(p1[0], filename, sizeof(filename));
-        filename[sizeof(filename) - 1] = '\0';
+        write(dept1[1], "abc.txt", 7);
+        close(dept1[1]);
 
-        FILE *fp = fopen(filename, "r");
-
-        if (fp == NULL)
+        while(read(dept2[0], buffer, sizeof(buffer)))
         {
-            strcpy(buffer, "Error: File not found!\n");
-        }
-        else
-        {
-            int n = fread(buffer, 1, sizeof(buffer) - 1, fp);
-            buffer[n] = '\0';
-            fclose(fp);
+            printf("%s", buffer);
         }
 
-        write(p2[1], buffer, strlen(buffer) + 1);
-
-        close(p1[0]);
-        close(p2[1]);
-    }
-    else if (pid > 0)
-    {
-        close(p1[0]);
-        close(p2[1]);
-
-        printf("Enter file pathname: ");
-        scanf("%99s", filename);
-
-        write(p1[1], filename, strlen(filename) + 1);
-        close(p1[1]);
-
-        int n = read(p2[0], buffer, sizeof(buffer));
-
-        if (n > 0)
-        {
-            buffer[n - 1] = '\0';
-            printf("\nFile contents:\n%s\n", buffer);
-        }
-
-        close(p2[0]);
-        wait(NULL);
+        close(dept2[0]);
     }
     else
     {
-        perror("fork");
-        return 1;
-    }
+        close(dept1[1]); // close the write end of dept1
+        close(dept2[0]); // close the read end of dept2
 
+        read(dept1[0], filename, sizeof(filename));
+        close(dept1[0]);
+
+        fd = open(filename, O_RDONLY);
+
+        if(fd < 0)
+        {
+            write(dept2[1], "file not found", 14);
+        }
+        else
+        {
+            while(read(fd, buffer, sizeof(buffer)))
+            {
+                write(dept2[1], buffer, sizeof(buffer));
+            }
+
+            close(fd);
+        }
+
+        close(dept2[1]);
+    }
     return 0;
 }
