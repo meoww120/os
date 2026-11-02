@@ -48,44 +48,19 @@ case $choice in
 	fi
 ;;
 5)
-	echo "1) edit single record\n2) edit entire record row"
-	read ed
-	
-	case $ed in 
-	1)
-		cat record 
-		echo "\t\t"
+	cat record 
+	echo "\t\t"
 
-		if [ -f record ]
-		then
-			echo "Enter record to be edited "
-			read oldd
-			echo "Enter the chanage "
-			read newd
-			echo "\n\n"
-			# FIXED: Changed single quotes to double quotes so variables expand
-			sed -i "s/$oldd/$newd/" record
-		fi
-	;;
-	2)
-		cat record 
-		echo "\t\t"
-
-		if [ -f record ]
-		then
-    		echo "Enter word or pattern to find the row: "
-    		read oldd
-    		echo "Enter the new content for the entire row: "
-    		read newd
-    		echo "\n\n"
-    
-    		sed -i "s/.*$oldd.*/$newd/" record
-		fi
-	;;
-	*)
-		echo "Invalid modification choice.\n\n"
-	;;
-	esac # FIXED: Added the missing esac here to close the inner case block
+	if [ -f record ]
+	then
+		echo "Enter record to be edited "
+		read oldd
+		echo "Enter the chanage "
+		read newd
+		echo "\n\n"
+		# FIXED: Changed single quotes to double quotes so variables expand
+		sed -i "s/$oldd/$newd/" record
+	fi
 ;;
 6)
 	echo "Exiting program. Goodbye!\n"
