@@ -1,22 +1,23 @@
+
 #include <stdio.h>
 #include <stdlib.h>
 
 int a[20], n, start;
 
-// Sort requests in ascending order
+// Bubble Sort in ascending order
 void sort()
 {
     int i, j, t;
 
     for (i = 0; i < n - 1; i++)
     {
-        for (j = i + 1; j < n; j++)
+        for (j = 0; j < n - i - 1; j++)
         {
-            if (a[i] > a[j])
+            if (a[j] > a[j + 1])
             {
-                t = a[i];
-                a[i] = a[j];
-                a[j] = t;
+                t = a[j];
+                a[j] = a[j + 1];
+                a[j + 1] = t;
             }
         }
     }
@@ -59,7 +60,7 @@ void scan()
     printf("\nTotal movement = %d\n", total);
 }
 
-// Circular LOOK
+// C-LOOK disk scheduling
 void clook()
 {
     int i, head = start, total = 0;
