@@ -3,7 +3,7 @@
 #include <semaphore.h>
 #include <unistd.h>
 
-sem_t room, fork[5];
+sem_t room, forks[5];
 
 void *philosopher(void *arg)
 {
@@ -13,14 +13,14 @@ void *philosopher(void *arg)
 
     sem_wait(&room);
 
-    sem_wait(&fork[i]);
-    sem_wait(&fork[(i + 1) % 5]);
+    sem_wait(&forks[i]);
+    sem_wait(&forks[(i + 1) % 5]);
 
     printf("Philosopher %d is eating\n", i);
     sleep(1);
 
-    sem_post(&fork[i]);
-    sem_post(&fork[(i + 1) % 5]);
+    sem_post(&forks[i]);
+    sem_post(&forks[(i + 1) % 5]);
 
     sem_post(&room);
 
@@ -36,7 +36,7 @@ int main()
 
     for (int i = 0; i < 5; i++)
     {
-        sem_init(&fork[i], 0, 1);
+        sem_init(&forks[i], 0, 1);
     }    
 
     for (int i = 0; i < 5; i++)
@@ -51,7 +51,7 @@ int main()
     sem_destroy(&room);
 
     for (int i = 0; i < 5; i++)
-        sem_destroy(&fork[i]);
+        sem_destroy(&forks[i]);
 
     return 0;
 }
